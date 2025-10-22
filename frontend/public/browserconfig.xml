@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "Currency Dashboard",
+  "description": "Live Currency Rate Aggregation and Trend Dashboard",
+  "icons": {
+    "48": "favicon.ico"
+  }
+}
