@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Box } from '@mui/material';
 import { TrendData } from '../types';
@@ -34,12 +34,20 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
     return <Box sx={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No data available</Box>;
   }
 
-  const chartData = {
-    labels: data.data_points.map((point) => new Date(Object.keys(point)[0]).toLocaleDateString()),
+  const labels = useMemo(() => {
+    return data.data_points.map((point) => new Date(Object.keys(point)[0]).toLocaleDateString());
+  }, [data]);
+
+  const datasetValues = useMemo(() => {
+    return data.data_points.map((point) => Object.values(point)[0] as number);
+  }, [data]);
+
+  const chartData = useMemo(() => ({
+    labels,
     datasets: [
       {
         label: `${data.currency}/USD Rate`,
-        data: data.data_points.map((point) => Object.values(point)[0]),
+        data: datasetValues,
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -48,9 +56,9 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
         pointHoverRadius: 5,
       },
     ],
-  };
+  }), [labels, datasetValues, data.currency]);
 
-  const options: any = {
+  const options: any = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -96,7 +104,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
       axis: 'x' as const,
       intersect: false
     }
-  };
+  }), [data.currency, timeframe]);
 
   return (
     <Box sx={{ height: '400px', width: '100%', position: 'relative' }}>
@@ -105,4 +113,4 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
   );
 };
 
-export default TrendChart;
+export default React.memo(TrendChart);

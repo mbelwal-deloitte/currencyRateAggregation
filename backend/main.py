@@ -1,17 +1,21 @@
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-import httpx
-import asyncio
-import os
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import ORJSONResponse
+
 from dotenv import load_dotenv
-from azure.cosmos import CosmosClient
+
 from models import CurrencyRate, TrendData
 from services import currency_service, trend_service
 
 load_dotenv()
 
-app = FastAPI(title="Currency Rate Aggregation API")
+app = FastAPI(
+    title="Currency Rate Aggregation API",
+    default_response_class=ORJSONResponse,
+)
 
 # CORS middleware configuration
 app.add_middleware(
@@ -21,6 +25,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Enable gzip compression for large responses
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+
+# Lightweight cache headers for GET endpoints
+@app.middleware("http")
+async def add_cache_headers(request, call_next):
+    response = await call_next(request)
+    if request.method == "GET":
+        path = request.url.path
+        if path.startswith("/api/rates/current"):
+            # Frequent updates; cache briefly
+            response.headers["Cache-Control"] = "public, max-age=15, must-revalidate"
+        elif path.startswith("/api/trends"):
+            # Trends change less frequently
+            response.headers["Cache-Control"] = "public, max-age=300"
+        elif path.startswith("/api/health"):
+            response.headers["Cache-Control"] = "no-store"
+    return response
 
 # API endpoints for currency rates
 API_ENDPOINTS = [

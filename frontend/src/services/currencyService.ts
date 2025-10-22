@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { AggregatedRate, TrendData } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 export const currencyService = {
   getCurrentRates: async (): Promise<AggregatedRate[]> => {
