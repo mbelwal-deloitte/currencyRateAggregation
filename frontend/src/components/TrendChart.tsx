@@ -34,7 +34,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
     return <Box sx={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No data available</Box>;
   }
 
-  const chartData = {
+  const chartData = React.useMemo(() => ({
     labels: data.data_points.map((point) => new Date(Object.keys(point)[0]).toLocaleDateString()),
     datasets: [
       {
@@ -48,9 +48,9 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
         pointHoverRadius: 5,
       },
     ],
-  };
+  }), [data]);
 
-  const options: any = {
+  const options: any = React.useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -96,7 +96,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
       axis: 'x' as const,
       intersect: false
     }
-  };
+  }), [data.currency, timeframe]);
 
   return (
     <Box sx={{ height: '400px', width: '100%', position: 'relative' }}>
@@ -105,4 +105,4 @@ const TrendChart: React.FC<TrendChartProps> = ({ data, timeframe }) => {
   );
 };
 
-export default TrendChart;
+export default React.memo(TrendChart);

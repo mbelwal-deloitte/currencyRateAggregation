@@ -1,5 +1,5 @@
 # Base image
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
 # Set working directory
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --prefer-offline --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -20,4 +20,5 @@ RUN npm run build
 EXPOSE 3000
 
 # Start the application
+# Use development server by default; override in prod with a static server if desired
 CMD ["npm", "start"]
