@@ -1,13 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-import httpx
-import asyncio
-import os
 from dotenv import load_dotenv
-from azure.cosmos import CosmosClient
-from models import CurrencyRate, TrendData
 from services import currency_service, trend_service
+from services.http_client import startup as http_startup, shutdown as http_shutdown
 
 load_dotenv()
 
@@ -22,11 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# API endpoints for currency rates
-API_ENDPOINTS = [
-    "https://2025-06-18.currency-api.pages.dev/v1/currencies/usd.json",
-    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2025-06-18/v1/currencies/usd.json"
-]
+@app.on_event("startup")
+async def on_startup():
+    await http_startup()
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    await http_shutdown()
 
 @app.get("/")
 async def root():

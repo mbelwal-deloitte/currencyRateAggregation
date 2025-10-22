@@ -74,4 +74,4 @@ const RateDisplay: React.FC<RateDisplayProps> = ({ rates, onCurrencySelect }) =>
   );
 };
 
-export default RateDisplay;
+export default React.memo(RateDisplay);
