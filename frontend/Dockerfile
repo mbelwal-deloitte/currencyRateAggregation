@@ -1,23 +1,23 @@
-# Base image
-FROM node:18-alpine
+########## BUILD STAGE ##########
+FROM node:18-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci --prefer-offline --no-audit --progress=false
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Expose port
+########## RUNTIME STAGE ##########
+FROM nginx:1.27-alpine AS runtime
+
+# Copy built assets
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Replace default nginx config with optimized one
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]
