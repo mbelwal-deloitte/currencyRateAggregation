@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Live Currency Rate Aggregation and Trend Dashboard
 
 A real-time web application that aggregates currency exchange rates and displays trends with interactive visualizations.
@@ -91,3 +92,6 @@ Please read CONTRIBUTING.md for details on our code of conduct and the process f
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+=======
+# currencyRateAggregation
+>>>>>>> 26c92b8089f99aafdf54ef3bef07d49046b47b0c
