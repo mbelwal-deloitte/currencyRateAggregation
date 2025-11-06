@@ -3,7 +3,7 @@ import { Box, Grid, Paper, Tab, Tabs, CircularProgress, Alert } from '@mui/mater
 import RateDisplay from './RateDisplay';
 import TrendChart from './TrendChart';
 import { AggregatedRate, TrendData } from '../types';
-// import { currencyService } from '../services/currencyService'; // Uncomment when backend is ready
+import { currencyService } from '../services/currencyService';
 
 const CurrencyDashboard: React.FC = () => {
   const [rates, setRates] = useState<AggregatedRate[]>([]);
@@ -18,26 +18,8 @@ const CurrencyDashboard: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        // For testing, using mock data since the backend might not be ready
-        const mockData: AggregatedRate[] = [
-          {
-            currency: 'EUR',
-            average_rate: 0.85,
-            min_rate: 0.84,
-            max_rate: 0.86,
-            last_updated: new Date().toISOString(),
-            sources: ['source1', 'source2']
-          },
-          {
-            currency: 'GBP',
-            average_rate: 0.73,
-            min_rate: 0.72,
-            max_rate: 0.74,
-            last_updated: new Date().toISOString(),
-            sources: ['source1', 'source2']
-          }
-        ];
-        setRates(mockData);
+        const data = await currencyService.getCurrentRates();
+        setRates(data);
       } catch (error) {
         console.error('Error fetching rates:', error);
         setError('Failed to fetch current rates');
@@ -57,21 +39,8 @@ const CurrencyDashboard: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        // For testing, using mock trend data
-        const mockTrendData: TrendData = {
-          currency: selectedCurrency,
-          timeframe: timeframe,
-          data_points: Array.from({ length: 10 }, (_, i) => {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            return {
-              [date.toISOString()]: 0.85 + (Math.random() - 0.5) * 0.1
-            };
-          }),
-          start_date: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(),
-          end_date: new Date().toISOString()
-        };
-        setTrendData(mockTrendData);
+        const data = await currencyService.getTrends(selectedCurrency, timeframe);
+        setTrendData(data);
       } catch (error) {
         console.error('Error fetching trends:', error);
         setError('Failed to fetch trend data');

@@ -1,13 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 import httpx
 import asyncio
 import os
 from dotenv import load_dotenv
-from azure.cosmos import CosmosClient
-from models import CurrencyRate, TrendData
-from services import currency_service, trend_service
+from typing import List, Dict
+import random
 
 load_dotenv()
 
@@ -36,7 +35,19 @@ async def root():
 async def get_current_rates():
     """Fetch and aggregate current rates from multiple sources"""
     try:
-        rates = await currency_service.fetch_current_rates()
+        # Mock data for demonstration
+        currencies = ["EUR", "GBP", "JPY", "AUD", "CAD"]
+        rates = []
+        for currency in currencies:
+            base_rate = random.uniform(0.5, 2.0)
+            rates.append({
+                "currency": currency,
+                "average_rate": base_rate,
+                "min_rate": base_rate * 0.99,
+                "max_rate": base_rate * 1.01,
+                "last_updated": datetime.utcnow().isoformat(),
+                "sources": ["API_1", "API_2"]
+            })
         return rates
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -49,8 +60,35 @@ async def get_trends(currency: str, timeframe: str):
         raise HTTPException(status_code=400, detail="Invalid timeframe")
     
     try:
-        trends = await trend_service.get_trends(currency, timeframe)
-        return trends
+        # Mock trend data
+        points = 30 if timeframe == "monthly" else 7 if timeframe == "weekly" else 24
+        base_rate = random.uniform(0.5, 2.0)
+        
+        end_date = datetime.utcnow()
+        if timeframe == "daily":
+            start_date = end_date - timedelta(hours=points)
+            delta = timedelta(hours=1)
+        elif timeframe == "weekly":
+            start_date = end_date - timedelta(days=points)
+            delta = timedelta(days=1)
+        else:
+            start_date = end_date - timedelta(days=points)
+            delta = timedelta(days=1)
+
+        data_points = []
+        current_date = start_date
+        while current_date <= end_date:
+            rate = base_rate + random.uniform(-0.1, 0.1)
+            data_points.append({current_date.isoformat(): rate})
+            current_date += delta
+
+        return {
+            "currency": currency,
+            "timeframe": timeframe,
+            "data_points": data_points,
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat()
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
