@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Box, Grid, Paper, Tab, Tabs, CircularProgress, Alert } from '@mui/material';
 import RateDisplay from './RateDisplay';
-import TrendChart from './TrendChart';
+const TrendChart = React.lazy(() => import('./TrendChart'));
 import { AggregatedRate, TrendData } from '../types';
 import { currencyService } from '../services/currencyService';
 
@@ -93,7 +93,11 @@ const CurrencyDashboard: React.FC = () => {
                   <CircularProgress />
                 </Box>
               ) : (
-                trendData && <TrendChart data={trendData} timeframe={timeframe} />
+                trendData && (
+                  <Suspense fallback={<Box display="flex" justifyContent="center" alignItems="center" minHeight="400px"><CircularProgress /></Box>}>
+                    <TrendChart data={trendData} timeframe={timeframe} />
+                  </Suspense>
+                )
               )}
             </Box>
           </Paper>
